@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: tds-rag-gauntlet
+    runtime: python
+    plan: free
+    healthCheckPath: /health
+    buildCommand: >-
+      pip install -r requirements.txt &&
+      FASTEMBED_CACHE_PATH=./model_cache python -c "from fastembed import TextEmbedding; from fastembed.rerank.cross_encoder import TextCrossEncoder; TextEmbedding('sentence-transformers/all-MiniLM-L6-v2'); TextCrossEncoder('Xenova/ms-marco-MiniLM-L-6-v2')"
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.11"
+      - key: FASTEMBED_CACHE_PATH
+        value: ./model_cache
+      - key: LLM_API_URL
+        value: https://api.groq.com/openai/v1/chat/completions
+      - key: LLM_MODEL
+        value: llama-3.3-70b-versatile
+      - key: LLM_API_KEY
+        sync: false
